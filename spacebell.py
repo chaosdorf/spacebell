@@ -14,7 +14,6 @@ def on_connect(mqtt_server, userdata, flags, rc):
 def on_message(mqtt_server, userdata, msg):
     global BELL
     BELL = True
-    bell_player()
 
     print(msg.topic + " " + str(msg.payload))
     print(args.sample)
