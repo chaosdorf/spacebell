@@ -1,2 +1,2 @@
-paho-mqtt
-pulsectl
+paho-mqtt==1.5.0
+pulsectl==20.1.2

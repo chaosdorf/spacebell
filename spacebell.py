@@ -1,14 +1,17 @@
 import argparse
 import paho.mqtt.client as mqtt
+import pulsectl
 
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(mqtt_server, userdata, flags, rc):
     print("Connected with result code "+str(rc))
-    client.subscribe(args.topic)
+    mqtt_server.subscribe(args.topic)
 
 
-def on_message(client, userdata, msg):
+def on_message(mqtt_server, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
+    print(args.sample)
+    pulse_server.play_sample(args.sample, pulse_sinks[0])
 
 
 parser = argparse.ArgumentParser(description='The Chaosdorf doorbell service')
@@ -22,12 +25,15 @@ parser.add_argument('--topic', type=str,
 parser.add_argument('--sample', type=str,
                     help='The PulseAudio sample to play',
                     default='dong')
-args=parser.parse_args()
+args = parser.parse_args()
 
-client=mqtt.Client()
-client.on_connect=on_connect
-client.on_message=on_message
+pulse_server = pulsectl.Pulse('spacebell')
+pulse_sinks = pulse_server.sink_list()
 
-client.connect("mqttserver.chaosdorf.space", 1883, 60)
+mqtt_server = mqtt.Client()
+mqtt_server.on_connect = on_connect
+mqtt_server.on_message = on_message
 
-client.loop_forever()
+mqtt_server.connect(args.server, 1883, 60)
+
+mqtt_server.loop_forever()
