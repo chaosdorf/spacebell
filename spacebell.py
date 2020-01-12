@@ -1,6 +1,7 @@
 import argparse
 import paho.mqtt.client as mqtt
 import pulsectl
+from ratelimit import limits
 
 
 def on_connect(mqtt_server, userdata, flags, rc):
@@ -10,12 +11,16 @@ def on_connect(mqtt_server, userdata, flags, rc):
 
 def on_message(mqtt_server, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
-    print(args.sample)
+    play_sample()
+
+
+@limits(calls=1, period=5)
+def play_sample():
     pulse_server.play_sample(args.sample, pulse_sinks[0])
+    print("played sample '{}' successfully.".format(args.sample))
 
 
 parser = argparse.ArgumentParser(description='The Chaosdorf doorbell service')
-
 parser.add_argument('--server', type=str,
                     help='The mqtt server to connect to',
                     default='mqttserver.chaosdorf.space')
